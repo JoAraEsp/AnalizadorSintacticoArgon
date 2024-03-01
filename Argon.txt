@@ -1,0 +1,86 @@
+Declaración de variables
+A ->  NV I O
+NV -> L RL
+O -> L RL| D RD | true | false
+P -> .
+I -> =
+L -> a…z | A…Z
+D -> 0…9
+B -> C1 | C2
+C1 -> true
+C2 -> false
+RL -> L RL | ε
+RD -> D RD | ε
+ 
+Funciones
+IN -> DF RD
+DF -> Fn 
+RD -> L G1
+G1 -> RL G2
+G2 -> PA G3
+G3 -> PC G4
+G4 -> DP G5
+G5 -> LA G6
+G6 -> CO LC
+L -> a…z | A…Z
+RL -> L RL | ε
+PA -> ( 
+PC -> ) 
+DP -> : 
+LA -> { 
+LC -> } 
+CO -> Contenido
+
+ 
+Condicional
+IN -> I R
+I -> assuming
+R -> C J1
+J1 -> DP J2
+J2 -> LA J3
+J3 -> CO J4
+J4 -> LC E
+C -> L K1
+K1 -> RL K2
+K2 -> O OP
+O -> == | => | <= | != | > | <
+OP -> D RD | C1 | C2 | L RL | D RD
+L -> RD L2
+L2 -> P D RD
+E -> O1 M1
+O1 -> otherwise
+M1 -> DP M2
+M2 -> LA M3
+M3 -> CO LC
+L -> a…z|A…Z
+RL -> L RL | ε
+LA -> {
+LC -> }
+DP -> :
+P -> .
+CO -> Contenido
+D -> 0…9
+RD -> D RD | ε
+ 
+Ciclo
+IN -> Ci R
+CI -> loop
+R -> PA CA
+CA -> NA IC
+NA -> LL NO
+LL -> L RL 
+NO -> O OP
+IC -> DP DC
+DC -> LA DF
+DF -> CO LC
+L -> a…z|A…Z
+RL -> L RL | ε
+D -> 0…9
+O -> == | => | <= | != | > | <
+OP -> D RD | C1 | C2 | L RL | D RD
+PA -> ( 
+PC -> ) 
+DP -> : 
+LA -> { 
+LC -> } 
+CO -> Contenido
