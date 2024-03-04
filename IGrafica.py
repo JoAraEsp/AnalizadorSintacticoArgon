@@ -1,31 +1,64 @@
 import tkinter as tk
-from tkinter.scrolledtext import ScrolledText
-from ALexico import analizador_lexico
-from ASintactico import analizador_sintactico
+from tkinter import messagebox
 
-def procesar():
-    entrada = texto_entrada.get("1.0", tk.END)
-    tokens = analizador_lexico(entrada)
-    resultado_lexico = "Análisis Léxico:\n"
-    for token in tokens:
-        resultado_lexico += f"Tipo: {token[0]}, Lexema: {token[1]}, Línea: {token[2]}\n"
+from ASintactico import analizar_sintaxis
+from ALexico import separar_elementos
 
-    resultado_sintactico = "Análisis Sintáctico:\n" + analizador_sintactico(tokens)
+class SyntaxisAnalizerUI:
+    def __init__(self) -> None:
+        pass
 
-    texto_salida.delete("1.0", tk.END)
-    texto_salida.insert(tk.END, resultado_lexico + "\n" + resultado_sintactico)
+    def analyze(self):
+        input_text = self.text_area.get("1.0", "end-1c")
+        input_list = separar_elementos(input_text)
+        message = analizar_sintaxis(input_list)
 
-ventana = tk.Tk()
-ventana.title("Programa Analizador")
-ventana.geometry("800x600")
+        temp_win = tk.Tk()
 
-texto_entrada = ScrolledText(ventana, height=15)
-texto_entrada.pack(padx=10, pady=5, fill=tk.BOTH, expand=True)
+        if message["success"]:
+            temp_win.title("Texto Valido")
+            label = tk.Label(temp_win, text="El texto es valido")
+            label.pack()
 
-boton_procesar = tk.Button(ventana, text="Procesar", command=procesar)
-boton_procesar.pack(pady=5)
+            text_area_title = tk.Label(temp_win, text="Historial")
+            text_area_title.pack()
 
-texto_salida = ScrolledText(ventana, height=15)
-texto_salida.pack(padx=10, pady=5, fill=tk.BOTH, expand=True)
+            text_area = tk.Text(temp_win, height=20, width=100)
+            text_area.pack()
 
-ventana.mainloop()
+            text_area.insert(tk.END, message["historial"])
+
+            temp_win.mainloop()
+
+        else:
+            temp_win.title("Texto Invalido")
+            text_msg = tk.Text(temp_win, height=20, width=100)
+            text_msg.pack()
+
+            text_msg.insert(tk.END, message["message"])
+
+            text_area_title = tk.Label(temp_win, text="Historial")
+            text_area_title.pack()
+
+            text_area = tk.Text(temp_win, height=20, width=100)
+            text_area.pack()
+
+            text_area.insert(tk.END, message["historial"])
+
+            temp_win.mainloop()
+
+    def show(self):
+        window = tk.Tk()
+        window.title("Analizador de Syntaxis")
+
+        self.text_area = tk.Text(window, height=20, width=100)
+        self.text_area.pack()
+
+        button = tk.Button(window, text="Analizar", command=self.analyze)
+        button.pack()
+
+        window.mainloop()
+
+if __name__ == "__main__":
+    ui = SyntaxisAnalizerUI()
+    ui.show()
