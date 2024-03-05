@@ -1,64 +1,150 @@
+import ctypes
+import re
 import tkinter as tk
-from tkinter import messagebox
 
-from ASintactico import analizar_sintaxis
-from ALexico import separar_elementos
+from tkinter import scrolledtext, messagebox, Button
+from ALexico import lexer
+from ASintactico import syntactic_analyzer
 
-class SyntaxisAnalizerUI:
-    def __init__(self) -> None:
-        pass
+# ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
-    def analyze(self):
-        input_text = self.text_area.get("1.0", "end-1c")
-        input_list = separar_elementos(input_text)
-        message = analizar_sintaxis(input_list)
+root = tk.Tk()
+root.title("Analizador ARGON")
+root.geometry("800x600")
 
-        temp_win = tk.Tk()
 
-        if message["success"]:
-            temp_win.title("Texto Valido")
-            label = tk.Label(temp_win, text="El texto es valido")
-            label.pack()
+def analyze_lexicon():
+    code = editArea.get("1.0", tk.END)
+    print(code)
 
-            text_area_title = tk.Label(temp_win, text="Historial")
-            text_area_title.pack()
+    tokens = lexer(code)
 
-            text_area = tk.Text(temp_win, height=20, width=100)
-            text_area.pack()
+    results_win = tk.Toplevel(root)
+    results_win.title("Resultados del Análisis Léxico")
 
-            text_area.insert(tk.END, message["historial"])
+    result_text = scrolledtext.ScrolledText(results_win, width=80, height=40)
+    result_text.pack()
 
-            temp_win.mainloop()
+    seen_types = set()
 
-        else:
-            temp_win.title("Texto Invalido")
-            text_msg = tk.Text(temp_win, height=20, width=100)
-            text_msg.pack()
+    for token in tokens:
+        type, value = token
+        if type not in seen_types:
+            valores = ",".join([v for t, v in tokens if t == type])
+            result_text.insert(tk.END, "{}: {}\n".format(type, valores))
+            seen_types.add(type)
 
-            text_msg.insert(tk.END, message["message"])
 
-            text_area_title = tk.Label(temp_win, text="Historial")
-            text_area_title.pack()
+def analyze_syntax():
+    code = editArea.get("1.0", tk.END)
 
-            text_area = tk.Text(temp_win, height=20, width=100)
-            text_area.pack()
+    response = syntactic_analyzer(code)
 
-            text_area.insert(tk.END, message["historial"])
+    if response['status'] == 'success':
+        messagebox.showinfo("Syntax Analysis", response['message'])
+    else:
+        messagebox.showerror("Syntax Analysis", response['message'])
 
-            temp_win.mainloop()
 
-    def show(self):
-        window = tk.Tk()
-        window.title("Analizador de Syntaxis")
 
-        self.text_area = tk.Text(window, height=20, width=100)
-        self.text_area.pack()
+def changes(event=None):
+    global previousText
 
-        button = tk.Button(window, text="Analizar", command=self.analyze)
-        button.pack()
+    if editArea.get("1.0", tk.END) == previousText:
+        return
 
-        window.mainloop()
+    for tag in editArea.tag_names():
+        editArea.tag_remove(tag, "1.0", "end")
 
-if __name__ == "__main__":
-    ui = SyntaxisAnalizerUI()
-    ui.show()
+    i = 0
+    for pattern, color in repl:
+        for start, end in search_re(pattern, editArea.get("1.0", tk.END)):
+            editArea.tag_add(f"{i}", start, end)
+            editArea.tag_config(f"{i}", foreground=color)
+
+            i += 1
+
+    previousText = editArea.get("1.0", tk.END)
+
+
+def search_re(pattern, text, groupid=0):
+    matches = []
+
+    text = text.splitlines()
+    for i, line in enumerate(text):
+        for match in re.finditer(pattern, line):
+            matches.append((f"{i + 1}.{match.start()}", f"{i + 1}.{match.end()}"))
+
+    return matches
+
+
+def rgb(rgb):
+    return "#%02x%02x%02x" % rgb
+
+
+previousText = ""
+background_color = rgb((255, 255, 255))
+normal_color = rgb((0,0,0))
+keywords_color = rgb((0,0,0))
+function_color = rgb((0,0,0))
+string_color = rgb((0,0,0))
+comments_color = rgb((0,0,0))
+args_color = rgb((0,0,0))
+parenthesis_color = rgb((0,0,0))
+brace_color = rgb((0,0,0))
+symbol_color = rgb((0,0,0))
+
+
+repl = [
+    (r"\bFn\b", function_color),
+    (r"\bassuming\b", keywords_color),
+    (r"\bloop\b", keywords_color),
+    (r"\btrue\b", keywords_color),
+    (r"\bfalse\b", keywords_color),
+    (r"\botherwise\b", keywords_color),
+    (r"\".*?\"", string_color),
+    (r"\(", parenthesis_color),
+    (r"\)", parenthesis_color),
+    (r"\{", brace_color),
+    (r"\}", brace_color),
+    (r"\=\=", symbol_color),
+    (r"\=\>", symbol_color),
+    (r"\<\=", symbol_color),
+    (r"\!\=", symbol_color),
+    (r"\>", symbol_color),
+    (r"\<", symbol_color),
+    (r"\=", symbol_color),  
+    (r"\+\+", symbol_color),
+    (r"\-\-", symbol_color),
+    (r"\+", symbol_color),
+    (r"\-", symbol_color),
+    (r"\*", symbol_color),
+    (r"\&", symbol_color),
+    (r"\:", symbol_color),
+]
+
+
+editArea = scrolledtext.ScrolledText(
+    root,
+    background=background_color,
+    foreground=normal_color,
+    insertbackground=normal_color,
+    relief=tk.FLAT,
+    borderwidth=30,
+    font="Consolas 15",
+)
+
+editArea.pack(fill=tk.BOTH, expand=1)
+
+editArea.bind("<KeyRelease>", changes)
+
+lexButton = Button (text="Léxico", font=("Arial", 10), bg='white', fg='black', command=analyze_lexicon)
+syntaxButton = Button(text="Sintáctico", font=("Arial", 10), bg='white', fg='black', command=analyze_syntax)
+lexButton.place(x=280, y=530, width=100, height=30)
+syntaxButton.place(x=400, y=530, width=100, height=30)
+
+root.mainloop()
+
+def load_content_from_file(path: str):
+    with open(path, 'r') as f:
+        return f.read()

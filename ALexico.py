@@ -1,27 +1,35 @@
-def separar_elementos(input_string):
-    elements = ["=", "(", ")", ":", "{", "}", "true", "false", "Fn", 
-                "assuming", "==", "=>", "<=", "!=", ">", "<", "loop", 
-                "otherwise", "Contenido"]
+import re
 
-    output_list = []
-    current_word = ""
+TOKEN_PATTERNS = [
+    ('STRING', r'\".*\"'),  
+    ('NUMERO', r'\d+'),  
+    ('PALABRAS_RESERVADAS', r'\b(Fn|assuming|loop|true|false|otherwise)\b'), 
+    ('ASIGNACION', r'='),  
+    ('OPERADORES_COMPARACION', r'(==|=>|<=|!=|>|<)'),  
+    ('PARENTESIS', r'(\(|\))'), 
+    ('LLAVES', r'(\{|\})'),  
+    ('DOS_PUNTOS', r'\:'), 
+    ('IDENTIFICADOR', r'[a-zA-Z][a-zA-Z0-9_]*'),  
+    ('INCREMENTO', r'(\+\+)'),
+    ('DECREMENTO', r'(\-\-)'),
+    ('SIGNOS', r'(\+|\-|\*|\&)'),  
+    ('PUNTO', r'\.'), 
+    ('COMA', r'\,'),  
+    ('PUNTO_Y_COMA', r'\;'),  
+]
 
-    for char in input_string:
-        if char.isspace():
-            if current_word:
-                # Comprobar si es un elemento reservado o un identificador/número.
-                output_list.append(current_word)
-                current_word = ""
-        elif char.isalnum() or char == '_':
-            current_word += char
+def lexer(code):
+    tokens = []
+    while code:
+        for token_name, pattern in TOKEN_PATTERNS:
+            match = re.match(pattern, code)
+            if match:
+                value = match.group(0)
+                tokens.append((token_name, value))
+                code = code[len(value):].lstrip()
+                break
         else:
-            if current_word:
-                output_list.append(current_word)
-                current_word = ""
-            if char in elements:
-                output_list.append(char)
+            tokens.append(("Simbolo no reconocido", code[0]))
+            code = code[1:].lstrip()
 
-    if current_word:
-        output_list.append(current_word)
-
-    return output_list
+    return tokens

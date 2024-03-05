@@ -1,0 +1,65 @@
+start: structures*
+structures: a | in | ic | il
+
+a: nv tf
+tf: I o
+nv: L r
+o: L r | D r | B
+
+
+in: DF nd
+nd: ft ip
+ft: L r
+ip: PA g1
+g1: PC g2
+g2: DP g3
+g3: LA g4
+g4: CO LC
+
+ic: A rt
+rt: c j1
+c: L k1
+k1: r k2
+k2: O op
+j1: DP j2
+j2: LA j3
+j3: CO j4
+j4: LC e
+e: OT m1
+m1: DP m2
+m2: LA m3
+m3: CO LC
+
+il: CI t
+t: PA ca
+ca: na if
+na: ll no
+ll: L r
+no: O to
+to: op PC
+if: DP dc
+dc: LA df
+df: CO LC
+
+r: L r | D r | L | D
+op: D r | L r | B
+
+L: "a".."z" | "A".."Z"
+D: "0".."9"
+B: "true" | "false"
+DP: ":"
+I: "="
+O: "==" | "=>" | "<=" | "!=" | ">" | "<"
+PA: "("
+PC: ")"
+LA: "{"
+LC: "}"
+DF: "Fn"
+CO: "Contenido"
+A: "assuming"
+OT: "otherwise"
+CI: "loop"
+
+
+%import common.WS
+%ignore WS

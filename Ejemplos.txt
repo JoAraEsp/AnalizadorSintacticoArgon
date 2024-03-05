@@ -1,0 +1,14 @@
+ab = true
+xd = 24
+uu = 074
+op = hola
+
+Fn function() :{Contenido}
+Fn esperaunpocoUnpoquitomas() :{Contenido}
+
+assuming xd < 01 :{Contenido} otherwise :{Contenido}
+assuming pozol > 10 :{Contenido} otherwise :{Contenido}
+
+
+loop (ab < 31) :{Contenido}
+loop (boa > 08) :{Contenido}
